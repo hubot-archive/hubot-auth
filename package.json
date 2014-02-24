@@ -1,0 +1,51 @@
+{
+  "name": "hubot-auth",
+  "description": "Assign roles to users and restrict command access in other scripts",
+  "version": "0.0.0",
+  "author": "Alex Williams (http://github.com/aw)",
+  "contributors": [
+    "technicalpickles",
+    "tombell",
+    "robertfwest",
+    "superkarn",
+    "omares",
+    "rafaelfranca",
+    "mizzy",
+    "jhubert",
+    "davereid",
+    "patcon"
+  ],
+  "license": "MIT",
+
+  "keywords": ["hubot","hubot-scripts","authentication","roles"],
+
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/hubot-scripts/hubot-auth.git"
+  },
+
+  "bugs": {
+    "url": "https://github.com/hubot-scripts/hubot-auth/issues"
+  },
+
+  "dependencies": {
+    "coffee-script": "~1.6"
+  },
+
+  "devDependencies": {
+    "mocha": "*",
+    "chai": "*",
+    "sinon-chai": "*",
+    "sinon": "*",
+    "grunt-mocha-test": "~0.7.0",
+    "grunt-release": "~0.6.0",
+    "matchdep": "~0.1.2",
+    "grunt-contrib-watch": "~0.5.3"
+  },
+
+  "main": "index.coffee",
+
+  "scripts": {
+    "test": "grunt test"
+  }
+}
