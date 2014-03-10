@@ -91,7 +91,7 @@ module.exports = (robot) ->
     user = robot.brain.userForName(name)
     return msg.reply "#{name} does not exist" unless user?
     user.roles or= []
-    displayRoles = user.roles
+    displayRoles = [].concat user.roles
 
     if user.id.toString() in admins
       displayRoles.push('admin')
