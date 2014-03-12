@@ -1,7 +1,7 @@
 {
   "name": "hubot-auth",
   "description": "Assign roles to users and restrict command access in other scripts",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "author": "Alex Williams (http://github.com/aw)",
   "contributors": [
     "technicalpickles",
