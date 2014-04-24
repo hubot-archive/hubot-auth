@@ -3,6 +3,7 @@
 #
 # Configuration:
 #   HUBOT_AUTH_ADMIN - A comma separate list of user IDs
+#   HUBOT_AUTH_ADMIN_ONLY - If set to 1, only admins can add and remove people from roles
 #
 # Commands:
 #   hubot <user> has <role> role - Assigns a role to a user
@@ -31,6 +32,11 @@ module.exports = (robot) ->
   else
     admins = []
 
+  if process.env.HUBOT_AUTH_ADMIN_ONLY and process.env.HUBOT_AUTH_ADMIN_ONLY is 1
+    onlyadmin = false
+  else
+    onlyadmin = true
+
   class Auth
     hasRole: (user, roles) ->
       user = robot.brain.userForId(user.id)
@@ -50,41 +56,47 @@ module.exports = (robot) ->
   robot.auth = new Auth
 
   robot.respond /@?(.+) (has) (["'\w: -_]+) (role)/i, (msg) ->
-    name    = msg.match[1].trim()
-    newRole = msg.match[3].trim().toLowerCase()
+    if !onlyadmin or msg.message.user.id in admins
+      name    = msg.match[1].trim()
+      newRole = msg.match[3].trim().toLowerCase()
 
-    unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
-      user = robot.brain.userForName(name)
-      return msg.reply "#{name} does not exist" unless user?
-      user.roles or= []
+      unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
+        user = robot.brain.userForName(name)
+        return msg.reply "#{name} does not exist" unless user?
+        user.roles or= []
 
-      if newRole in user.roles
-        msg.reply "#{name} already has the '#{newRole}' role."
-      else
+        if newRole in user.roles
+          msg.reply "#{name} already has the '#{newRole}' role."
+        else
+          if newRole is 'admin'
+            msg.reply "Sorry, the 'admin' role can only be defined in the HUBOT_AUTH_ADMIN env variable."
+          else
+            myRoles = msg.message.user.roles or []
+            if msg.message.user.id.toString() in admins
+              user.roles.push(newRole)
+              msg.reply "Ok, #{name} has the '#{newRole}' role."
+    else
+      msg.reply "Sorry, only admins can assign roles."
+
+  robot.respond /@?(.+) (doesn't have|does not have) (["'\w: -_]+) (role)/i, (msg) ->
+    if !onlyadmin or msg.message.user.id in admins
+      name    = msg.match[1].trim()
+      newRole = msg.match[3].trim().toLowerCase()
+
+      unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
+        user = robot.brain.userForName(name)
+        return msg.reply "#{name} does not exist" unless user?
+        user.roles or= []
+
         if newRole is 'admin'
-          msg.reply "Sorry, the 'admin' role can only be defined in the HUBOT_AUTH_ADMIN env variable."
+          msg.reply "Sorry, the 'admin' role can only be removed from the HUBOT_AUTH_ADMIN env variable."
         else
           myRoles = msg.message.user.roles or []
           if msg.message.user.id.toString() in admins
-            user.roles.push(newRole)
-            msg.reply "Ok, #{name} has the '#{newRole}' role."
-
-  robot.respond /@?(.+) (doesn't have|does not have) (["'\w: -_]+) (role)/i, (msg) ->
-    name    = msg.match[1].trim()
-    newRole = msg.match[3].trim().toLowerCase()
-
-    unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
-      user = robot.brain.userForName(name)
-      return msg.reply "#{name} does not exist" unless user?
-      user.roles or= []
-
-      if newRole is 'admin'
-        msg.reply "Sorry, the 'admin' role can only be removed from the HUBOT_AUTH_ADMIN env variable."
-      else
-        myRoles = msg.message.user.roles or []
-        if msg.message.user.id.toString() in admins
-          user.roles = (role for role in user.roles when role isnt newRole)
-          msg.reply "Ok, #{name} doesn't have the '#{newRole}' role."
+            user.roles = (role for role in user.roles when role isnt newRole)
+            msg.reply "Ok, #{name} doesn't have the '#{newRole}' role."
+    else
+      msg.reply "Sorry, only admins can remove roles."
 
   robot.respond /(what role does|what roles does) @?(.+) (have)\?*$/i, (msg) ->
     name = msg.match[2].trim()
