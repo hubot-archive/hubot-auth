@@ -2,8 +2,8 @@
 #   Assign roles to users and restrict command access in other scripts.
 #
 # Configuration:
-#   HUBOT_AUTH_ADMIN - A comma separate list of user IDs
-#   HUBOT_AUTH_ADMIN_ONLY - If set to 1, only admins can add and remove people from roles
+#   HUBOT_AUTH_ADMIN      - A comma separate list of user IDs
+#   HUBOT_AUTH_ADMIN_ONLY - If set (to anything), only admins can add and remove people from roles
 #
 # Commands:
 #   hubot <user> has <role> role - Assigns a role to a user
@@ -22,20 +22,19 @@
 #     correctly identify a user. Names were insecure as a user could impersonate
 #     a user
 
+config =
+  admin_list: process.env.HUBOT_AUTH_ADMIN
+  admin_only: process.env.HUBOT_AUTH_ADMIN_ONLY
+
 module.exports = (robot) ->
 
-  unless process.env.HUBOT_AUTH_ADMIN?
+  unless config.admin_list?
     robot.logger.warning 'The HUBOT_AUTH_ADMIN environment variable not set'
 
-  if process.env.HUBOT_AUTH_ADMIN?
-    admins = process.env.HUBOT_AUTH_ADMIN.split ','
+  if config.admin_list?
+    admins = config.admin_list.split ','
   else
     admins = []
-
-  if process.env.HUBOT_AUTH_ADMIN_ONLY and process.env.HUBOT_AUTH_ADMIN_ONLY is 1
-    onlyadmin = false
-  else
-    onlyadmin = true
 
   class Auth
     hasRole: (user, roles) ->
@@ -56,7 +55,9 @@ module.exports = (robot) ->
   robot.auth = new Auth
 
   robot.respond /@?(.+) (has) (["'\w: -_]+) (role)/i, (msg) ->
-    if !onlyadmin or msg.message.user.id in admins
+    if config.admin_only? and msg.message.user.id not in admins
+      msg.reply "Sorry, only admins can assign roles."
+    else
       name    = msg.match[1].trim()
       newRole = msg.match[3].trim().toLowerCase()
 
@@ -75,11 +76,11 @@ module.exports = (robot) ->
             if msg.message.user.id.toString() in admins
               user.roles.push(newRole)
               msg.reply "Ok, #{name} has the '#{newRole}' role."
-    else
-      msg.reply "Sorry, only admins can assign roles."
 
   robot.respond /@?(.+) (doesn't have|does not have) (["'\w: -_]+) (role)/i, (msg) ->
-    if !onlyadmin or msg.message.user.id in admins
+    if config.admin_only? and msg.message.user.id not in admins
+      msg.reply "Sorry, only admins can remove roles."
+    else
       name    = msg.match[1].trim()
       newRole = msg.match[3].trim().toLowerCase()
 
@@ -95,8 +96,6 @@ module.exports = (robot) ->
           if msg.message.user.id.toString() in admins
             user.roles = (role for role in user.roles when role isnt newRole)
             msg.reply "Ok, #{name} doesn't have the '#{newRole}' role."
-    else
-      msg.reply "Sorry, only admins can remove roles."
 
   robot.respond /(what role does|what roles does) @?(.+) (have)\?*$/i, (msg) ->
     name = msg.match[2].trim()
