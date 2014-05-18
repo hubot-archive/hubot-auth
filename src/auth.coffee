@@ -76,7 +76,7 @@ module.exports = (robot) ->
             myRoles = msg.message.user.roles or []
             if msg.message.user.id.toString() in admins
               user.roles.push(newRole)
-              msg.reply "Ok, #{name} has the '#{newRole}' role."
+              msg.reply "OK, #{name} has the '#{newRole}' role."
 
   robot.respond /@?(.+) does(?:n't| not) have (["'\w: -_]+) role/i, (msg) ->
     if config.admin_only? and msg.message.user.id not in admins
@@ -96,7 +96,7 @@ module.exports = (robot) ->
           myRoles = msg.message.user.roles or []
           if msg.message.user.id.toString() in admins
             user.roles = (role for role in user.roles when role isnt newRole)
-            msg.reply "Ok, #{name} doesn't have the '#{newRole}' role."
+            msg.reply "OK, #{name} doesn't have the '#{newRole}' role."
 
   robot.respond /(?:what roles? do(?:es)?) @?(.+) have\?*$/i, (msg) ->
     name = msg.match[1].trim()
