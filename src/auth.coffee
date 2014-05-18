@@ -126,3 +126,17 @@ module.exports = (robot) ->
       msg.reply "Looks like you're the only admin!"
     else
       msg.reply "There are no people that have the 'admin' role."
+
+  robot.respond /who has (["'\w: -_]+) role\?*$/i, (msg) ->
+    role = msg.match[1]
+    userNames = []
+    if role isnt "admin"
+      users = robot.brain.users()
+      for own id, user of users
+        user.roles ?= []
+        userNames.push user.name if role in user.roles
+
+      if userNames.length > 0
+        msg.reply "The following people have the '#{role}' role: #{userNames.join(', ')}"
+      else
+        msg.reply "There are no people that have the '#{role}' role."
