@@ -113,16 +113,12 @@ module.exports = (robot) ->
     if name.toLowerCase() is 'i' then name = msg.message.user.name
     user = robot.brain.userForName(name)
     return msg.reply "#{name} does not exist" unless user?
-    user.roles or= []
-    displayRoles = [].concat user.roles
+    userRoles = robot.auth.userRoles(user)
 
-    if user.id.toString() in admins
-      displayRoles.push('admin')
-
-    if displayRoles.length == 0
+    if userRoles.length == 0
       msg.reply "#{name} has no roles."
     else
-      msg.reply "#{name} has the following roles: #{displayRoles.join(', ')}."
+      msg.reply "#{name} has the following roles: #{userRoles.join(', ')}."
 
   robot.respond /who has admin role\?*$/i, (msg) ->
     adminNames = []
