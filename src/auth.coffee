@@ -61,7 +61,7 @@ module.exports = (robot) ->
       if user? and user.id.toString() in admins
         roles.push('admin')
       if user.roles?
-        roles.concat user.roles
+        roles = roles.concat user.roles
       roles
 
   robot.auth = new Auth
