@@ -51,13 +51,12 @@ module.exports = (robot) ->
       users = []
       for own key, user of robot.brain.data.users
         if @hasRole(user, role)
-	  users.push(user.name)
+          users.push(user.name)
       users
 
     userRoles: (user) ->
-      user = robot.brain.userForId(user.id)
       roles = []
-      if user? and user.id.toString() in admins
+      if user? and user.id in admins
         roles.push('admin')
       if user.roles?
         roles = roles.concat user.roles
