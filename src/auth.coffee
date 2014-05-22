@@ -45,13 +45,13 @@ module.exports = (robot) ->
       if user? and userRoles?
         roles = [roles] if typeof roles is 'string'
         for role in roles
-	  return true if role in userRoles
+          return true if role in userRoles
       return false
 
     usersWithRole: (role) ->
       users = []
       for own key, user of robot.brain.data.users
-	if @hasRole(user, role)
+        if @hasRole(user, role)
           users.push(user)
       users
 
@@ -123,12 +123,7 @@ module.exports = (robot) ->
 
   robot.respond /who has (["'\w: -_]+) role\?*$/i, (msg) ->
     role = msg.match[1]
-    userNames = []
-    users = robot.brain.users()
-    for own id, user of users
-      userRoles = robot.auth.userRoles(user)
-      user.roles ?= []
-      userNames.push user.name if role in userRoles
+    userNames = robot.auth.usersWithRole(role) if role?
 
     if userNames.length > 0
       msg.reply "The following people have the '#{role}' role: #{userNames.join(', ')}"
