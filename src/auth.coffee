@@ -120,29 +120,16 @@ module.exports = (robot) ->
     else
       msg.reply "#{name} has the following roles: #{userRoles.join(', ')}."
 
-  robot.respond /who has admin role\?*$/i, (msg) ->
-    adminNames = []
-    for admin in admins
-      user = robot.brain.userForId(admin)
-      adminNames.push user.name if user?
-
-    if adminNames.length > 0
-      msg.reply "The following people have the 'admin' role: #{adminNames.join(', ')}"
-    else if msg.message.user.id in admins
-      msg.reply "Looks like you're the only admin!"
-    else
-      msg.reply "There are no people that have the 'admin' role."
-
   robot.respond /who has (["'\w: -_]+) role\?*$/i, (msg) ->
     role = msg.match[1]
     userNames = []
-    if role isnt "admin"
-      users = robot.brain.users()
-      for own id, user of users
-        user.roles ?= []
-        userNames.push user.name if role in user.roles
+    users = robot.brain.users()
+    for own id, user of users
+      userRoles = robot.auth.userRoles(user)
+      user.roles ?= []
+      userNames.push user.name if role in userRoles
 
-      if userNames.length > 0
-        msg.reply "The following people have the '#{role}' role: #{userNames.join(', ')}"
-      else
-        msg.reply "There are no people that have the '#{role}' role."
+    if userNames.length > 0
+      msg.reply "The following people have the '#{role}' role: #{userNames.join(', ')}"
+    else
+      msg.reply "There are no people that have the '#{role}' role."
