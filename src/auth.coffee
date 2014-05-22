@@ -54,6 +54,15 @@ module.exports = (robot) ->
           users.push(user)
       users
 
+    userRoles: (user) ->
+      user = robot.brain.userForId(user.id)
+      roles = []
+      if user? and user.id.toString() in admins
+        roles.push('admin')
+      if user.roles?
+        roles.concat user.roles
+      roles
+
   robot.auth = new Auth
 
   robot.respond /@?(.+) has (["'\w: -_]+) role/i, (msg) ->
