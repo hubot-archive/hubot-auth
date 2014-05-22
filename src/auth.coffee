@@ -51,7 +51,7 @@ module.exports = (robot) ->
       users = []
       for own key, user of robot.brain.data.users
         if @hasRole(user, role)
-          users.push(user)
+	  users.push(user.name)
       users
 
     userRoles: (user) ->
