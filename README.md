@@ -1,5 +1,7 @@
 # Hubot: hubot-auth
 
+[![Build Status](https://travis-ci.org/hubot-scripts/hubot-auth.svg?branch=master)](https://travis-ci.org/hubot-scripts/hubot-auth)
+
 Assign roles to users and restrict command access in other scripts.
 
 See [`src/auth.coffee`](src/auth.coffee) for full documentation.
