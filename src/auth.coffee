@@ -8,9 +8,8 @@
 # Commands:
 #   hubot <user> has <role> role - Assigns a role to a user
 #   hubot <user> doesn't have <role> role - Removes a role from a user
-#   hubot what role does <user> have - Find out what roles are assigned to a specific user
-#   hubot what role do I have - Find out what roles you have
-#   hubot who has admin role - Find out who's an admin and can assign roles
+#   hubot what roles does <user> have - Find out what roles a user has
+#   hubot what roles do I have - Find out what roles you have
 #   hubot who has <role> role - Find out who has the given role
 #
 # Notes:
@@ -87,12 +86,12 @@ module.exports = (robot) ->
               user.roles.push(newRole)
               msg.reply "OK, #{name} has the '#{newRole}' role."
 
-  robot.respond /@?(.+) does(?:n't| not) have (["'\w: -_]+) role/i, (msg) ->
+  robot.respond /@?(.+) does(n't| not) have (["'\w: -_]+) role/i, (msg) ->
     if config.admin_only? and msg.message.user.id not in admins
       msg.reply "Sorry, only admins can remove roles."
     else
       name    = msg.match[1].trim()
-      newRole = msg.match[2].trim().toLowerCase()
+      newRole = msg.match[3].trim().toLowerCase()
 
       unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
         user = robot.brain.userForName(name)
@@ -107,8 +106,8 @@ module.exports = (robot) ->
             user.roles = (role for role in user.roles when role isnt newRole)
             msg.reply "OK, #{name} doesn't have the '#{newRole}' role."
 
-  robot.respond /(?:what roles? do(?:es)?) @?(.+) have\?*$/i, (msg) ->
-    name = msg.match[1].trim()
+  robot.respond /what roles? do(es)? @?(.+) have\?*$/i, (msg) ->
+    name = msg.match[2].trim()
     if name.toLowerCase() is 'i' then name = msg.message.user.name
     user = robot.brain.userForName(name)
     return msg.reply "#{name} does not exist" unless user?
