@@ -9,7 +9,9 @@
 #   hubot <user> has <role> role - Assigns a role to a user
 #   hubot <user> doesn't have <role> role - Removes a role from a user
 #   hubot what role does <user> have - Find out what roles are assigned to a specific user
+#   hubot what role do I have - Find out what roles you have
 #   hubot who has admin role - Find out who's an admin and can assign roles
+#   hubot who has <role> role - Find out who has the given role
 #
 # Notes:
 #   * Call the method: robot.auth.hasRole(msg.envelope.user,'<role>')
@@ -38,28 +40,36 @@ module.exports = (robot) ->
 
   class Auth
     hasRole: (user, roles) ->
-      user = robot.brain.userForId(user.id)
-      if user? and user.roles?
+      userRoles = @userRoles(user)
+      if userRoles?
         roles = [roles] if typeof roles is 'string'
         for role in roles
-          return true if role in user.roles
+          return true if role in userRoles
       return false
 
     usersWithRole: (role) ->
       users = []
       for own key, user of robot.brain.data.users
-        if robot.auth.hasRole(msg.envelope.user, role)
-          users.push(user)
+        if @hasRole(user, role)
+          users.push(user.name)
       users
+
+    userRoles: (user) ->
+      roles = []
+      if user? and user.id in admins
+        roles.push('admin')
+      if user.roles?
+        roles = roles.concat user.roles
+      roles
 
   robot.auth = new Auth
 
-  robot.respond /@?(.+) (has) (["'\w: -_]+) (role)/i, (msg) ->
+  robot.respond /@?(.+) has (["'\w: -_]+) role/i, (msg) ->
     if config.admin_only? and msg.message.user.id not in admins
       msg.reply "Sorry, only admins can assign roles."
     else
       name    = msg.match[1].trim()
-      newRole = msg.match[3].trim().toLowerCase()
+      newRole = msg.match[2].trim().toLowerCase()
 
       unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
         user = robot.brain.userForName(name)
@@ -75,14 +85,14 @@ module.exports = (robot) ->
             myRoles = msg.message.user.roles or []
             if msg.message.user.id.toString() in admins
               user.roles.push(newRole)
-              msg.reply "Ok, #{name} has the '#{newRole}' role."
+              msg.reply "OK, #{name} has the '#{newRole}' role."
 
-  robot.respond /@?(.+) (doesn't have|does not have) (["'\w: -_]+) (role)/i, (msg) ->
+  robot.respond /@?(.+) does(?:n't| not) have (["'\w: -_]+) role/i, (msg) ->
     if config.admin_only? and msg.message.user.id not in admins
       msg.reply "Sorry, only admins can remove roles."
     else
       name    = msg.match[1].trim()
-      newRole = msg.match[3].trim().toLowerCase()
+      newRole = msg.match[2].trim().toLowerCase()
 
       unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
         user = robot.brain.userForName(name)
@@ -95,30 +105,25 @@ module.exports = (robot) ->
           myRoles = msg.message.user.roles or []
           if msg.message.user.id.toString() in admins
             user.roles = (role for role in user.roles when role isnt newRole)
-            msg.reply "Ok, #{name} doesn't have the '#{newRole}' role."
+            msg.reply "OK, #{name} doesn't have the '#{newRole}' role."
 
-  robot.respond /(what role does|what roles does) @?(.+) (have)\?*$/i, (msg) ->
-    name = msg.match[2].trim()
+  robot.respond /(?:what roles? do(?:es)?) @?(.+) have\?*$/i, (msg) ->
+    name = msg.match[1].trim()
+    if name.toLowerCase() is 'i' then name = msg.message.user.name
     user = robot.brain.userForName(name)
     return msg.reply "#{name} does not exist" unless user?
-    user.roles or= []
-    displayRoles = [].concat user.roles
+    userRoles = robot.auth.userRoles(user)
 
-    if user.id.toString() in admins
-      displayRoles.push('admin')
-
-    if displayRoles.length == 0
+    if userRoles.length == 0
       msg.reply "#{name} has no roles."
     else
-      msg.reply "#{name} has the following roles: #{displayRoles.join(', ')}."
+      msg.reply "#{name} has the following roles: #{userRoles.join(', ')}."
 
-  robot.respond /who has admin role\?*$/i, (msg) ->
-    adminNames = []
-    for admin in admins
-      user = robot.brain.userForId(admin)
-      adminNames.push user.name if user?
+  robot.respond /who has (["'\w: -_]+) role\?*$/i, (msg) ->
+    role = msg.match[1]
+    userNames = robot.auth.usersWithRole(role) if role?
 
-    if adminNames.length > 0
-      msg.reply "The following people have the 'admin' role: #{adminNames.join(', ')}"
+    if userNames.length > 0
+      msg.reply "The following people have the '#{role}' role: #{userNames.join(', ')}"
     else
-      msg.reply "There are no people that have the 'admin' role."
+      msg.reply "There are no people that have the '#{role}' role."

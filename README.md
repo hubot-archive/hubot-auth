@@ -28,6 +28,6 @@ Run `npm install`
 ## Sample Interaction
 
 ```
-user1>> hubot hello
-hubot>> hello!
+user1>> hubot user2 has jester role
+hubot>> OK, user2 has the jester role.
 ```
