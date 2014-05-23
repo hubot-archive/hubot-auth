@@ -2,8 +2,7 @@
 #   Assign roles to users and restrict command access in other scripts.
 #
 # Configuration:
-#   HUBOT_AUTH_ADMIN      - A comma separate list of user IDs
-#   HUBOT_AUTH_ADMIN_ONLY - If set (to anything), only admins can add and remove people from roles
+#   HUBOT_AUTH_ADMIN - A comma separate list of user IDs
 #
 # Commands:
 #   hubot <user> has <role> role - Assigns a role to a user
@@ -25,7 +24,6 @@
 
 config =
   admin_list: process.env.HUBOT_AUTH_ADMIN
-  admin_only: process.env.HUBOT_AUTH_ADMIN_ONLY
 
 module.exports = (robot) ->
 
@@ -64,7 +62,7 @@ module.exports = (robot) ->
   robot.auth = new Auth
 
   robot.respond /@?(.+) has (["'\w: -_]+) role/i, (msg) ->
-    if config.admin_only? and msg.message.user.id not in admins
+    if msg.message.user.id.toString() not in admins
       msg.reply "Sorry, only admins can assign roles."
     else
       name    = msg.match[1].trim()
@@ -82,12 +80,11 @@ module.exports = (robot) ->
             msg.reply "Sorry, the 'admin' role can only be defined in the HUBOT_AUTH_ADMIN env variable."
           else
             myRoles = msg.message.user.roles or []
-            if msg.message.user.id.toString() in admins
-              user.roles.push(newRole)
-              msg.reply "OK, #{name} has the '#{newRole}' role."
+            user.roles.push(newRole)
+            msg.reply "OK, #{name} has the '#{newRole}' role."
 
   robot.respond /@?(.+) does(n't| not) have (["'\w: -_]+) role/i, (msg) ->
-    if config.admin_only? and msg.message.user.id not in admins
+    if msg.message.user.id.toString() not in admins
       msg.reply "Sorry, only admins can remove roles."
     else
       name    = msg.match[1].trim()
@@ -102,9 +99,8 @@ module.exports = (robot) ->
           msg.reply "Sorry, the 'admin' role can only be removed from the HUBOT_AUTH_ADMIN env variable."
         else
           myRoles = msg.message.user.roles or []
-          if msg.message.user.id.toString() in admins
-            user.roles = (role for role in user.roles when role isnt newRole)
-            msg.reply "OK, #{name} doesn't have the '#{newRole}' role."
+          user.roles = (role for role in user.roles when role isnt newRole)
+          msg.reply "OK, #{name} doesn't have the '#{newRole}' role."
 
   robot.respond /what roles? do(es)? @?(.+) have\?*$/i, (msg) ->
     name = msg.match[2].trim()
