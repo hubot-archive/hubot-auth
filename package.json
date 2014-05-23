@@ -34,15 +34,15 @@
     "coffee-script": "~1.6"
   },
   "devDependencies": {
-    "mocha": "*",
     "chai": "*",
-    "sinon-chai": "*",
-    "sinon": "*",
+    "grunt": "^0.4.4",
+    "grunt-contrib-watch": "~0.5.3",
     "grunt-mocha-test": "~0.7.0",
     "grunt-release": "~0.6.0",
+    "hubot": "^2.7.5",
+    "hubot-mock-adapter": "^1.0.0",
     "matchdep": "~0.1.2",
-    "grunt-contrib-watch": "~0.5.3",
-    "grunt": "^0.4.4"
+    "mocha": "*"
   },
   "main": "index.coffee",
   "scripts": {
