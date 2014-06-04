@@ -36,6 +36,9 @@ module.exports = (robot) ->
     admins = []
 
   class Auth
+    isAdmin: (user) ->
+      user.id.toString() in admins
+
     hasRole: (user, roles) ->
       userRoles = @userRoles(user)
       if userRoles?
@@ -62,7 +65,7 @@ module.exports = (robot) ->
   robot.auth = new Auth
 
   robot.respond /@?(.+) has (["'\w: -_]+) role/i, (msg) ->
-    if msg.message.user.id.toString() not in admins
+    unless robot.auth.isAdmin msg.message.user
       msg.reply "Sorry, only admins can assign roles."
     else
       name    = msg.match[1].trim()
@@ -84,7 +87,7 @@ module.exports = (robot) ->
             msg.reply "OK, #{name} has the '#{newRole}' role."
 
   robot.respond /@?(.+) does(n't| not) have (["'\w: -_]+) role/i, (msg) ->
-    if msg.message.user.id.toString() not in admins
+    unless robot.auth.isAdmin msg.message.user
       msg.reply "Sorry, only admins can remove roles."
     else
       name    = msg.match[1].trim()
