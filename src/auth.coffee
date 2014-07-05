@@ -56,7 +56,7 @@ module.exports = (robot) ->
 
     userRoles: (user) ->
       roles = []
-      if user? and user.id in admins
+      if user? and robot.auth.isAdmin user
         roles.push('admin')
       if user.roles?
         roles = roles.concat user.roles
