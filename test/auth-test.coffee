@@ -68,6 +68,13 @@ describe 'auth', ->
 
     adapter.receive(new TextMessage admin_user, "hubot: role-user has demo role")
 
+  it 'admin user successfully sets role in the first-person', (done) ->
+    adapter.on "reply", (envelope, strings) ->
+      expect(strings[0]).to.match /admin-user has the 'demo' role/i
+      done()
+
+    adapter.receive(new TextMessage admin_user, "hubot: I have demo role")
+
   it 'fail to add admin role via command', (done) ->
     adapter.on "reply", (envelope, strings) ->
       expect(strings[0]).to.match /sorry/i
@@ -81,6 +88,15 @@ describe 'auth', ->
       done()
 
     adapter.receive(new TextMessage admin_user, "hubot: role-user doesn't have admin role")
+
+  it 'admin user successfully removes role in the first-person', (done) ->
+    adapter.receive(new TextMessage admin_user, "hubot: admin-user has demo role")
+
+    adapter.on "reply", (envelope, strings) ->
+      expect(strings[0]).to.match /ha(s|ve) the 'demo' role/i
+      done()
+
+    adapter.receive(new TextMessage admin_user, "hubot: I don't have demo role")
 
   it 'successfully list multiple roles of admin user', (done) ->
     adapter.receive(new TextMessage admin_user, "hubot: admin-user has demo role")
