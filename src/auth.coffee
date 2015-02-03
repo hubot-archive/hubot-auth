@@ -68,7 +68,8 @@ module.exports = (robot) ->
     unless robot.auth.isAdmin msg.message.user
       msg.reply "Sorry, only admins can assign roles."
     else
-      name    = msg.match[1].trim()
+      name = msg.match[1].trim()
+      if name.toLowerCase() is 'i' then name = msg.message.user.name
       newRole = msg.match[2].trim().toLowerCase()
 
       unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
@@ -90,7 +91,8 @@ module.exports = (robot) ->
     unless robot.auth.isAdmin msg.message.user
       msg.reply "Sorry, only admins can remove roles."
     else
-      name    = msg.match[1].trim()
+      name = msg.match[1].trim()
+      if name.toLowerCase() is 'i' then name = msg.message.user.name
       newRole = msg.match[3].trim().toLowerCase()
 
       unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
