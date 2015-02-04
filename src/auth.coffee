@@ -64,12 +64,13 @@ module.exports = (robot) ->
 
   robot.auth = new Auth
 
-  robot.respond /@?(.+) has (["'\w: -_]+) role/i, (msg) ->
+  robot.respond /@?(.+) ha(s|ve) (["'\w: -_]+) role/i, (msg) ->
     unless robot.auth.isAdmin msg.message.user
       msg.reply "Sorry, only admins can assign roles."
     else
-      name    = msg.match[1].trim()
-      newRole = msg.match[2].trim().toLowerCase()
+      name = msg.match[1].trim()
+      if name.toLowerCase() is 'i' then name = msg.message.user.name
+      newRole = msg.match[3].trim().toLowerCase()
 
       unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
         user = robot.brain.userForName(name)
@@ -86,12 +87,13 @@ module.exports = (robot) ->
             user.roles.push(newRole)
             msg.reply "OK, #{name} has the '#{newRole}' role."
 
-  robot.respond /@?(.+) does(n't| not) have (["'\w: -_]+) role/i, (msg) ->
+  robot.respond /@?(.+) do(n't|esn't|es)( not)? have (["'\w: -_]+) role/i, (msg) ->
     unless robot.auth.isAdmin msg.message.user
       msg.reply "Sorry, only admins can remove roles."
     else
-      name    = msg.match[1].trim()
-      newRole = msg.match[3].trim().toLowerCase()
+      name = msg.match[1].trim()
+      if name.toLowerCase() is 'i' then name = msg.message.user.name
+      newRole = msg.match[4].trim().toLowerCase()
 
       unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
         user = robot.brain.userForName(name)
