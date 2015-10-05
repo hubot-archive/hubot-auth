@@ -87,7 +87,7 @@ module.exports = (robot) ->
             user.roles.push(newRole)
             msg.reply "OK, #{name} has the '#{newRole}' role."
 
-  robot.respond /@?(.+) do(n't|esn't|es)( not)? have (["'\w: -_]+) role/i, (msg) ->
+  robot.respond /@?(.+) do(n['’]t|esn['’]t|es)( not)? have (["'\w: -_]+) role/i, (msg) ->
     unless robot.auth.isAdmin msg.message.user
       msg.reply "Sorry, only admins can remove roles."
     else
