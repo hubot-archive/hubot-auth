@@ -26,6 +26,10 @@ config =
   admin_list: process.env.HUBOT_AUTH_ADMIN
 
 module.exports = (robot) ->
+  robot.listenerMiddleware (context, next, done) ->
+    context.response.message.user.groups = (cb) ->
+      cb(robot.auth.userRoles(context.response.message.user))
+    next()
 
   unless config.admin_list?
     robot.logger.warning 'The HUBOT_AUTH_ADMIN environment variable not set'
