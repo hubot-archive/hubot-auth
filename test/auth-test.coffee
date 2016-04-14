@@ -44,8 +44,9 @@ describe 'auth', ->
 
     done()
 
-  afterEach ->
+  afterEach (done) ->
     robot.shutdown()
+    done()
 
   it 'list admin users', (done) ->
     adapter.on "reply", (envelope, strings) ->
@@ -93,6 +94,9 @@ describe 'auth', ->
     adapter.receive(new TextMessage admin_user, "hubot: admin-user has demo role")
 
     adapter.on "reply", (envelope, strings) ->
+      if strings[0].match /OK, admin-user has .*demo/i
+        return
+
       expect(strings[0]).to.match /ha(s|ve) the 'demo' role/i
       done()
 
@@ -102,6 +106,9 @@ describe 'auth', ->
     adapter.receive(new TextMessage admin_user, "hubot: admin-user has demo role")
 
     adapter.on "reply", (envelope, strings) ->
+      if strings[0].match /OK, admin-user has .*demo/i
+        return
+
       expect(strings[0]).to.match(/following roles: .*admin/)
       expect(strings[0]).to.match(/following roles: .*demo/)
       done()
