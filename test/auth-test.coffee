@@ -55,6 +55,13 @@ describe 'auth', ->
 
     adapter.receive(new TextMessage admin_user, "hubot: who has admin role?")
 
+  it 'list admin users using non-admin user', (done) ->
+    adapter.on "reply", (envelope, strings) ->
+      expect(strings[0]).to.match /admin-user/i
+      done()
+
+    adapter.receive(new TextMessage anon_user, "hubot: who has admin role?")
+
   it 'anon user fails to set role', (done) ->
     adapter.on "reply", (envelope, strings) ->
       expect(strings[0]).to.match /only admins can assign roles/i
