@@ -10,6 +10,7 @@
 #   hubot what roles does <user> have - Find out what roles a user has
 #   hubot what roles do I have - Find out what roles you have
 #   hubot who has <role> role - Find out who has the given role
+#   hubot list all custom roles - Find out what custom roles you have and users assigned to them.
 #
 # Notes:
 #   * Call the method: robot.auth.hasRole(msg.envelope.user,'<role>')
@@ -26,6 +27,8 @@ config =
   admin_list: process.env.HUBOT_AUTH_ADMIN
 
 module.exports = (robot) ->
+  customroles = robot.brain.data["hubot-auth-customroles"]
+  customroles = [] if !customroles?
 
   unless config.admin_list?
     robot.logger.warning 'The HUBOT_AUTH_ADMIN environment variable not set'
@@ -64,16 +67,27 @@ module.exports = (robot) ->
 
   robot.auth = new Auth
 
-  robot.respond /@?([^\s]+) ha(?:s|ve) (["'\w: -_]+) role/i, (msg) ->
-    name = msg.match[1].trim()
-    if name.toLowerCase() is 'i' then name = msg.message.user.name
+  robot.respond /list all custom roles/i, (msg) ->
+    unless robot.auth.isAdmin msg.message.user
+        msg.reply "Sorry, only admins can list all custom roles."
+    else
+        if customroles.length == 0
+            msg.reply "Sorry, no custom roles to list."
+        else
+            for item in customroles
+                getUsers = robot.auth.usersWithRole(item)
+                msg.reply("Custom role name: #{item}\n
+                Users with role: #{getUsers}")
 
-    unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
-      unless robot.auth.isAdmin msg.message.user
-        msg.reply "Sorry, only admins can assign roles."
-      else
-        newRole = msg.match[2].trim().toLowerCase()
+  robot.respond /@?(.+) ha(s|ve) (["'\w: -_]+) role/i, (msg) ->
+    unless robot.auth.isAdmin msg.message.user
+      msg.reply "Sorry, only admins can assign roles."
+    else
+      name = msg.match[1].trim()
+      if name.toLowerCase() is 'i' then name = msg.message.user.name
+      newRole = msg.match[3].trim().toLowerCase()
 
+      unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
         user = robot.brain.userForName(name)
         return msg.reply "#{name} does not exist" unless user?
         user.roles or= []
@@ -85,19 +99,21 @@ module.exports = (robot) ->
             msg.reply "Sorry, the 'admin' role can only be defined in the HUBOT_AUTH_ADMIN env variable."
           else
             myRoles = msg.message.user.roles or []
+            customroles.push(newRole)
+            robot.brain.data["hubot-auth-customroles"] = customroles
+            robot.brain.save()
             user.roles.push(newRole)
             msg.reply "OK, #{name} has the '#{newRole}' role."
 
-  robot.respond /@?([^\s]+) (?:don['’]t|doesn['’]t|do not) have (["'\w: -_]+) role/i, (msg) ->
-    name = msg.match[1].trim()
-    if name.toLowerCase() is 'i' then name = msg.message.user.name
+  robot.respond /@?(.+) do(n['’]t|esn['’]t|es)( not)? have (["'\w: -_]+) role/i, (msg) ->
+    unless robot.auth.isAdmin msg.message.user
+      msg.reply "Sorry, only admins can remove roles."
+    else
+      name = msg.match[1].trim()
+      if name.toLowerCase() is 'i' then name = msg.message.user.name
+      newRole = msg.match[4].trim().toLowerCase()
 
-    unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
-      unless robot.auth.isAdmin msg.message.user
-        msg.reply "Sorry, only admins can remove roles."
-      else
-        newRole = msg.match[2].trim().toLowerCase()
-
+      unless name.toLowerCase() in ['', 'who', 'what', 'where', 'when', 'why']
         user = robot.brain.userForName(name)
         return msg.reply "#{name} does not exist" unless user?
         user.roles or= []
@@ -109,7 +125,7 @@ module.exports = (robot) ->
           user.roles = (role for role in user.roles when role isnt newRole)
           msg.reply "OK, #{name} doesn't have the '#{newRole}' role."
 
-  robot.respond /what roles? do(es)? @?([^\s]+) have\?*$/i, (msg) ->
+  robot.respond /what roles? do(es)? @?(.+) have\?*$/i, (msg) ->
     name = msg.match[2].trim()
     if name.toLowerCase() is 'i' then name = msg.message.user.name
     user = robot.brain.userForName(name)
