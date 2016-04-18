@@ -105,7 +105,7 @@ module.exports = (robot) ->
             user.roles.push(newRole)
             msg.reply "OK, #{name} has the '#{newRole}' role."
 
-  robot.respond /@?(.+) do(n['’]t|esn['’]t|es)( not)? have (["'\w: -_]+) role/i, (msg) ->
+  robot.respond /@?(.+) do(n't|esn't|es)( not)? have (["'\w: -_]+) role/i, (msg) ->
     unless robot.auth.isAdmin msg.message.user
       msg.reply "Sorry, only admins can remove roles."
     else
@@ -125,7 +125,7 @@ module.exports = (robot) ->
           user.roles = (role for role in user.roles when role isnt newRole)
           msg.reply "OK, #{name} doesn't have the '#{newRole}' role."
 
-  robot.respond /what roles? do(es)? @?([^\s]+) have\?*$/i, (msg) ->
+  robot.respond /what roles? do(es)? @?(.+) have\?*$/i, (msg) ->
     name = msg.match[2].trim()
     if name.toLowerCase() is 'i' then name = msg.message.user.name
     user = robot.brain.userForName(name)
