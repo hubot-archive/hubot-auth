@@ -11,6 +11,7 @@
 #   hubot what roles do I have - Find out what roles you have
 #   hubot who has <role> role - Find out who has the given role
 #   hubot list all custom roles - Find out what custom roles you have and users assigned to them.
+#   hubot remove custom role <role> - Remove custom role if no users assigned to it
 #
 # Notes:
 #   * Call the method: robot.auth.hasRole(msg.envelope.user,'<role>')
@@ -78,6 +79,20 @@ module.exports = (robot) ->
                 getUsers = robot.auth.usersWithRole(item)
                 msg.reply("Custom role name: #{item}\n
                 Users with role: #{getUsers}")
+
+  robot.respond /remove custom role (.*)/i, (msg) ->
+    role = msg.match[1].trim()
+
+    if robot.auth.usersWithRole(role).length > 0
+        msg.reply("Sorry, role is not empty thus cannot be deleted.\n
+        Users with role: #{robot.auth.usersWithRole(role)}")
+    else
+        getIndex = customroles.indexOf(role)
+        if getIndex > -1
+            customroles.splice(getIndex, 1)
+            robot.brain.data["hubot-auth-customroles"] = customroles
+            robot.brain.save()
+            msg.reply("Custom role #{role} deleted.")
 
   robot.respond /@?([^\s]+) ha(?:s|ve) (["'\w: -_]+) role/i, (msg) ->
     name = msg.match[1].trim()
