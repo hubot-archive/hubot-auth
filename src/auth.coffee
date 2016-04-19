@@ -75,12 +75,9 @@ module.exports = (robot) ->
             roles.push role for role in user.roles when role not in roles
         if roles.length > 0
             msg.reply "The following roles are available: #{roles.join(', ')}"
-            i = 0
-            while i < roles.length
-                msg.reply "The role #{roles[i]} has the following users assigned to it: #{robot.auth.usersWithRole(role)}"
-                i++
         else
-                msg.reply "No roles have been assigned."
+            msg.reply "No roles to list."
+
 
   robot.respond /@?([^\s]+) ha(?:s|ve) (["'\w: -_]+) role/i, (msg) ->
     name = msg.match[1].trim()
