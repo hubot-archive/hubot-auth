@@ -121,3 +121,18 @@ describe 'auth', ->
       done()
 
     adapter.receive(new TextMessage anon_user, "hubot: what roles does admin-user have?")
+
+  it 'successfully list assigned roles', (done) ->
+      adapter.receive(new TextMessage admin_user, "hubot: admin-user has demo role")
+      adapter.receive(new TextMessage admin_user, "hubot: anon-user has test role")
+      adapter.receive(new TextMessage admin_user, "hubot: admin-user has test role")
+
+      adapter.on "reply", (envelope, strings) ->
+          if strings[0].match /OK, .* has .* role/i
+              return
+
+
+          expect(strings[0]).to.match(/following roles .*:.*demo.*test/)
+          done()
+
+      adapter.receive(new TextMessage admin_user, "hubot: list assigned roles")
