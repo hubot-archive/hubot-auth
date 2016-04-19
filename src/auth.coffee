@@ -66,7 +66,6 @@ module.exports = (robot) ->
   robot.auth = new Auth
 
   robot.respond /list assigned roles/i, (msg) ->
-    #using nick-woodward's rewrite with a touch of my interpretation
     roles = []
     unless robot.auth.isAdmin msg.message.user
         msg.reply "Sorry, only admins can list assigned roles."
