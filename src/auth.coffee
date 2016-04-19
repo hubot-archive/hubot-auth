@@ -79,6 +79,8 @@ module.exports = (robot) ->
             while i < roles.length
                 msg.reply "The role #{roles[i]} has the following users assigned to it: #{robot.auth.usersWithRole(role)}"
                 i++
+        else
+                msg.reply "No roles have been assigned."
 
   robot.respond /@?([^\s]+) ha(?:s|ve) (["'\w: -_]+) role/i, (msg) ->
     name = msg.match[1].trim()
