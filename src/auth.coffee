@@ -10,6 +10,7 @@
 #   hubot what roles does <user> have - Find out what roles a user has
 #   hubot what roles do I have - Find out what roles you have
 #   hubot who has <role> role - Find out who has the given role
+#   hubot list assigned roles - List all roles and users assigned to them
 #
 # Notes:
 #   * Call the method: robot.auth.hasRole(msg.envelope.user,'<role>')
@@ -63,6 +64,18 @@ module.exports = (robot) ->
       roles
 
   robot.auth = new Auth
+
+  robot.respond /list assigned roles/i, (msg) ->
+    #using nick-woodward's rewrite with a touch of my interpretation
+    roles = []
+    for i, user of robot.brain.data.users when user.roles
+      roles.push role for role in user.roles when role not in roles
+    if roles.length > 0
+        msg.reply "The following roles are available: #{roles.join(', ')}"
+        i = 0
+        while i < roles.length
+            msg.reply "The role #{roles[i]} has the following users assigned to it: #{robot.auth.usersWithRole(role)}"
+            i++
 
   robot.respond /@?([^\s]+) ha(?:s|ve) (["'\w: -_]+) role/i, (msg) ->
     name = msg.match[1].trim()
