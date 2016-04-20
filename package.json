@@ -39,7 +39,7 @@
     "grunt-contrib-watch": "~0.5.3",
     "grunt-mocha-test": "~0.7.0",
     "grunt-release": "~0.6.0",
-    "hubot": "^2.7.5",
+    "hubot": "^2.15.0",
     "hubot-mock-adapter": "^1.0.0",
     "matchdep": "~0.1.2",
     "mocha": "*"
