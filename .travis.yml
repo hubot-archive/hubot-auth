@@ -1,10 +1,10 @@
 language: node_js
-
 node_js:
   - "node"
   - "4.4"
-
 before_install: npm install -g grunt-cli
-
+cache:
+  directories:
+    - node_modules
 notifications:
   email: false
