@@ -8,7 +8,6 @@ describe "auth", ->
   beforeEach ->
     process.env.HUBOT_AUTH_ADMIN = "alice"
     @room = helper.createRoom()
-    @adapter = @room.robot.adapter
     @room.robot.brain.userForId "alice",
       name: "alice"
 
