@@ -1,138 +1,118 @@
-expect = require('chai').expect
-path   = require 'path'
+Helper = require("hubot-test-helper")
+helper = new Helper("../src")
 
-Robot       = require 'hubot/src/robot'
-TextMessage = require('hubot/src/message').TextMessage
+expect = require("chai").expect
 
-describe 'auth', ->
-  robot = {}
-  admin_user = {}
-  role_user = {}
-  anon_user = {}
-  adapter = {}
+describe "auth", ->
 
-  beforeEach (done) ->
-    process.env.HUBOT_AUTH_ADMIN = "1"
+  beforeEach ->
+    process.env.HUBOT_AUTH_ADMIN = "alice"
+    @room = helper.createRoom()
+    @room.robot.brain.userForId "alice",
+      name: "alice"
 
-    # Create new robot, without http, using mock adapter
-    robot = new Robot null, "mock-adapter", false
+    @room.robot.brain.userForId "jimmy",
+      name: "jimmy"
 
-    robot.adapter.on "connected", ->
+    @room.robot.brain.userForId "amy",
+      name: "amy"
 
-      # load the module under test and configure it for the
-      # robot. This is in place of external-scripts
-      require("../src/auth")(robot)
+  afterEach ->
+    @room.destroy()
 
-      admin_user = robot.brain.userForId "1", {
-        name: "admin-user"
-        room: "#test"
-      }
+  context "<user> has <role> role", ->
 
-      role_user = robot.brain.userForId "2", {
-        name: "role-user"
-        room: "#test"
-      }
-
-      anon_user = robot.brain.userForId "3", {
-        name: "anon-user"
-        room: "#test"
-      }
-
-      adapter = robot.adapter
-
-    robot.run()
-
-    done()
-
-  afterEach (done) ->
-    robot.shutdown()
-    done()
-
-  it 'list admin users', (done) ->
-    adapter.on "reply", (envelope, strings) ->
-      expect(strings[0]).to.match /admin-user/i
-      done()
-
-    adapter.receive(new TextMessage admin_user, "hubot: who has admin role?")
-
-  it 'list admin users using non-admin user', (done) ->
-    adapter.on "reply", (envelope, strings) ->
-      expect(strings[0]).to.match /admin-user/i
-      done()
-
-    adapter.receive(new TextMessage anon_user, "hubot: who has admin role?")
-
-  it 'anon user fails to set role', (done) ->
-    adapter.on "reply", (envelope, strings) ->
-      expect(strings[0]).to.match /only admins can assign roles/i
-      done()
-
-    adapter.receive(new TextMessage anon_user, "hubot: role-user has demo role")
-
-  it 'admin user successfully sets role', (done) ->
-    adapter.on "reply", (envelope, strings) ->
-      expect(strings[0]).to.match /role-user has the 'demo' role/i
-      done()
-
-    adapter.receive(new TextMessage admin_user, "hubot: role-user has demo role")
-
-  it 'admin user successfully sets role in the first-person', (done) ->
-    adapter.on "reply", (envelope, strings) ->
-      expect(strings[0]).to.match /admin-user has the 'demo' role/i
-      done()
-
-    adapter.receive(new TextMessage admin_user, "hubot: I have demo role")
-
-  it 'fail to add admin role via command', (done) ->
-    adapter.on "reply", (envelope, strings) ->
-      expect(strings[0]).to.match /sorry/i
-      done()
-
-    adapter.receive(new TextMessage admin_user, "hubot: role-user has admin role")
-
-  it 'fail to remove admin role via command', (done) ->
-    adapter.on "reply", (envelope, strings) ->
-      expect(strings[0]).to.match /sorry/i
-      done()
-
-    adapter.receive(new TextMessage admin_user, "hubot: role-user doesn't have admin role")
-
-  it 'admin user successfully removes role in the first-person', (done) ->
-    adapter.receive(new TextMessage admin_user, "hubot: admin-user has demo role")
-
-    adapter.on "reply", (envelope, strings) ->
-      if strings[0].match /OK, admin-user has .*demo/i
-        return
-
-      expect(strings[0]).to.match /ha(s|ve) the 'demo' role/i
-      done()
-
-    adapter.receive(new TextMessage admin_user, "hubot: I don't have demo role")
-
-  it 'successfully list multiple roles of admin user', (done) ->
-    adapter.receive(new TextMessage admin_user, "hubot: admin-user has demo role")
-
-    adapter.on "reply", (envelope, strings) ->
-      if strings[0].match /OK, admin-user has .*demo/i
-        return
-
-      expect(strings[0]).to.match(/following roles: .*admin/)
-      expect(strings[0]).to.match(/following roles: .*demo/)
-      done()
-
-    adapter.receive(new TextMessage anon_user, "hubot: what roles does admin-user have?")
-
-  it 'successfully list assigned roles', (done) ->
-      adapter.receive(new TextMessage admin_user, "hubot: admin-user has demo role")
-      adapter.receive(new TextMessage admin_user, "hubot: anon-user has test role")
-      adapter.receive(new TextMessage admin_user, "hubot: admin-user has test role")
-
-      adapter.on "reply", (envelope, strings) ->
-          if strings[0].match /OK, .* has .* role/i
-              return
+    it "admin user successfully sets role", ->
+      @room.user.say("alice", "hubot: jimmy has demo role").then =>
+        expect(@room.messages).to.eql [
+          ["alice", "hubot: jimmy has demo role"]
+          ["hubot", "@alice OK, jimmy has the 'demo' role."]
+        ]
 
 
-          expect(strings[0]).to.match(/following roles .*:.*demo.*test/)
-          done()
+    it "admin user successfully sets role in the first-person", ->
+      @room.user.say("alice", "hubot: I have demo role").then =>
+        expect(@room.messages).to.eql [
+          ["alice", "hubot: I have demo role"]
+          ["hubot", "@alice OK, alice has the 'demo' role."]
+        ]
 
-      adapter.receive(new TextMessage admin_user, "hubot: list assigned roles")
+
+    it "fail to add admin role via command", ->
+      @room.user.say("alice", "hubot: jimmy has admin role").then =>
+        expect(@room.messages).to.eql [
+          ["alice", "hubot: jimmy has admin role"]
+          ["hubot", "@alice Sorry, the 'admin' role can only be defined in the HUBOT_AUTH_ADMIN env variable."]
+        ]
+
+    it "anon user fails to set role", ->
+      @room.user.say("amy", "hubot: jimmy has demo role").then =>
+        expect(@room.messages).to.eql [
+          ["amy", "hubot: jimmy has demo role"]
+          ["hubot", "@amy Sorry, only admins can assign roles."]
+        ]
+
+  context "<user> doesn't have <role> role", ->
+    it "admin user successfully removes role in the first-person", ->
+      @room.user.say("alice", "hubot: alice has demo role").then =>
+        @room.user.say("alice", "hubot: I don't have demo role").then =>
+          expect(@room.messages).to.eql [
+            ["alice", "hubot: alice has demo role"]
+            ["hubot", "@alice OK, alice has the 'demo' role."]
+            ["alice", "hubot: I don't have demo role"]
+            ["hubot", "@alice OK, alice doesn't have the 'demo' role."]
+          ]
+
+    it "fail to remove admin role via command", ->
+      @room.user.say("alice", "hubot: jimmy doesn't have admin role").then =>
+        expect(@room.messages).to.eql [
+          ["alice", "hubot: jimmy doesn't have admin role"]
+          ["hubot", "@alice Sorry, the 'admin' role can only be removed from the HUBOT_AUTH_ADMIN env variable."]
+        ]
+
+  context "what roles does <user> have", ->
+    beforeEach ->
+      @room.user.say("alice", "hubot: alice has demo role")
+
+    it "successfully list multiple roles of admin user", ->
+      @room.user.say("amy", "hubot: what roles does alice have?").then =>
+        expect(@room.messages).to.eql [
+          ["alice", "hubot: alice has demo role"]
+          ["hubot", "@alice OK, alice has the 'demo' role."]
+          ["amy", "hubot: what roles does alice have?"]
+          ["hubot", "@amy alice has the following roles: admin, demo."]
+        ]
+
+  context "who has <role> role", ->
+    it "list admin users", ->
+      @room.user.say("alice", "hubot: who has admin role?").then =>
+        expect(@room.messages).to.eql [
+          ["alice", "hubot: who has admin role?"]
+          ["hubot", "@alice The following people have the 'admin' role: alice"]
+        ]
+
+    it "list admin users using non-admin user", ->
+      @room.user.say("amy", "hubot: who has admin role?").then =>
+        expect(@room.messages).to.eql [
+          ["amy", "hubot: who has admin role?"]
+          ["hubot", "@amy The following people have the 'admin' role: alice"]
+        ]
+
+  context "list assigned roles", ->
+    beforeEach ->
+        @room.user.say("alice", "hubot: alice has demo role").then =>
+          @room.user.say("alice", "hubot: amy has test role").then =>
+            @room.user.say "alice", "hubot: alice has test role"
+
+    it "successfully list assigned roles", ->
+        @room.user.say("alice", "hubot: list assigned roles").then =>
+          expect(@room.messages).to.eql [
+            ["alice", "hubot: alice has demo role"]
+            ["hubot", "@alice OK, alice has the 'demo' role."]
+            ["alice", "hubot: amy has test role"]
+            ["hubot", "@alice OK, amy has the 'test' role."]
+            ["alice", "hubot: alice has test role"]
+            ["hubot", "@alice OK, alice has the 'test' role."]
+            ["alice", "hubot: list assigned roles"]
+            ["hubot", "@alice The following roles are available: demo, test"]
+          ]
