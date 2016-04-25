@@ -10,7 +10,7 @@
 #   hubot what roles does <user> have - Find out what roles a user has
 #   hubot what roles do I have - Find out what roles you have
 #   hubot who has <role> role - Find out who has the given role
-#   hubot list assigned roles - List all roles and users assigned to them
+#   hubot list assigned roles - List all assigned roles
 #
 # Notes:
 #   * Call the method: robot.auth.hasRole(msg.envelope.user,'<role>')
