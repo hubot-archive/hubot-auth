@@ -28,3 +28,11 @@ Run `npm install`
 user1>> hubot user2 has jester role
 hubot>> OK, user2 has the jester role.
 ```
+
+## HUBOT_AUTH_ROLES
+
+This can be used to give a default set of roles and **must** be used to set the admin role.
+
+```sh
+HUBOT_AUTH_ROLES="admin=U12345678 mod=U87654321,U67856745"
+```
