@@ -1,6 +1,6 @@
 {
-  "name": "hubot-auth",
-  "description": "Assign roles to users and restrict command access in other scripts",
+  "name": "hubot-auth-latest",
+  "description": "Assign roles to users and restrict command access in other scripts. Created to get latest code from repo.",
   "version": "1.2.0",
   "author": "Alex Williams (http://github.com/aw)",
   "contributors": [
@@ -19,10 +19,7 @@
   ],
   "license": "MIT",
   "keywords": [
-    "hubot",
-    "hubot-scripts",
-    "authentication",
-    "roles"
+
   ],
   "repository": {
     "type": "git",
@@ -33,6 +30,7 @@
   },
   "dependencies": {
     "coffee-script": "^1.10.0"
+    "hubot-auth": "hubot-scripts/hubot-auth"
   },
   "devDependencies": {
     "chai": "^3.5.0",
