@@ -28,37 +28,14 @@ config =
   role_list: process.env.HUBOT_AUTH_ROLES
 
 module.exports = (robot) ->
-
-  # TODO: This has been deprecated so it needs to be removed at some point.
-  if config.admin_list?
-    robot.logger.warning 'The HUBOT_AUTH_ADMIN environment variable has been deprecated in favor of HUBOT_AUTH_ROLES'
-    for id in config.admin_list.split ','
-      user = robot.brain.userForId id
-
-      unless user?
-        robot.logger.warning "#{id} does not exist"
-      else
-        user.roles or= []
-        user.roles.push 'admin' unless 'admin' in user.roles
-
-  unless config.role_list?
-    robot.logger.warning 'The HUBOT_AUTH_ROLES environment variable not set'
-  else
-    for role in config.role_list.split ' '
-      [dummy, roleName, userIds] = role.match /(\w+)=([\w]+(?:,[\w]+)*)/
-      for id in userIds.split ','
-        user = robot.brain.userForId id
-
-        unless user?
-          robot.logger.warning "#{id} does not exist"
-        else
-          user.roles or= []
-          user.roles.push roleName unless roleName in user.roles
-
   class Auth
+    storedRoles = robot.brain.get('roles')
+    unless storedRoles
+      robot.brain.set('roles', {})
+      storedRoles = robot.brain.get('roles')
+
     isAdmin: (user) ->
-      roles = robot.brain.userForId(user.id).roles or []
-      'admin' in roles
+      @hasRole(user, 'admin')
 
     hasRole: (user, roles) ->
       userRoles = @userRoles(user)
@@ -76,10 +53,37 @@ module.exports = (robot) ->
       users
 
     userRoles: (user) ->
-      user.roles
+      storedRoles[user.id] or= []
+
+    addRole: (user, newRole) ->
+      userRoles = @userRoles(user)
+      userRoles.push newRole unless newRole in userRoles
+
+    revokeRole: (user, newRole) ->
+      userRoles = @userRoles(user)
+      userRoles = (role for role in userRoles when role isnt newRole)
+
+    getRoles: () ->
+      result = []
+      for own key, roles of storedRoles
+        result.push role for role in roles unless role in result
+      result
 
   robot.auth = new Auth
 
+  # TODO: This has been deprecated so it needs to be removed at some point.
+  if config.admin_list?
+    robot.logger.warning 'The HUBOT_AUTH_ADMIN environment variable has been deprecated in favor of HUBOT_AUTH_ROLES'
+    for id in config.admin_list.split ','
+      robot.auth.addRole({ id }, 'admin')
+
+  unless config.role_list?
+    robot.logger.warning 'The HUBOT_AUTH_ROLES environment variable not set'
+  else
+    for role in config.role_list.split ' '
+      [dummy, roleName, userIds] = role.match /(\w+)=([\w]+(?:,[\w]+)*)/
+      for id in userIds.split ','
+        robot.auth.addRole({ id }, roleName)
 
   robot.respond /@?([^\s]+) ha(?:s|ve) (["'\w: -_]+) role/i, (msg) ->
     name = msg.match[1].trim()
@@ -93,17 +97,14 @@ module.exports = (robot) ->
 
         user = robot.brain.userForName(name)
         return msg.reply "#{name} does not exist" unless user?
-        user.roles or= []
 
-        if newRole in user.roles
+        if robot.auth.hasRole(user, newRole)
           msg.reply "#{name} already has the '#{newRole}' role."
+        else if newRole is 'admin'
+          msg.reply "Sorry, the 'admin' role can only be defined in the HUBOT_AUTH_ROLES env variable."
         else
-          if newRole is 'admin'
-            msg.reply "Sorry, the 'admin' role can only be defined in the HUBOT_AUTH_ROLES env variable."
-          else
-            myRoles = msg.message.user.roles or []
-            user.roles.push(newRole)
-            msg.reply "OK, #{name} has the '#{newRole}' role."
+          robot.auth.addRole user, newRole
+          msg.reply "OK, #{name} has the '#{newRole}' role."
 
   robot.respond /@?([^\s]+) (?:don['’]t|doesn['’]t|do not) have (["'\w: -_]+) role/i, (msg) ->
     name = msg.match[1].trim()
@@ -117,13 +118,11 @@ module.exports = (robot) ->
 
         user = robot.brain.userForName(name)
         return msg.reply "#{name} does not exist" unless user?
-        user.roles or= []
 
         if newRole is 'admin'
           msg.reply "Sorry, the 'admin' role can only be removed from the HUBOT_AUTH_ROLES env variable."
         else
-          myRoles = msg.message.user.roles or []
-          user.roles = (role for role in user.roles when role isnt newRole)
+          robot.auth.revokeRole user, newRole
           msg.reply "OK, #{name} doesn't have the '#{newRole}' role."
 
   robot.respond /what roles? do(es)? @?([^\s]+) have\?*$/i, (msg) ->
@@ -148,13 +147,11 @@ module.exports = (robot) ->
       msg.reply "There are no people that have the '#{role}' role."
 
   robot.respond /list assigned roles/i, (msg) ->
-    roles = []
     unless robot.auth.isAdmin msg.message.user
-        msg.reply "Sorry, only admins can list assigned roles."
+      msg.reply "Sorry, only admins can list assigned roles."
     else
-        for i, user of robot.brain.users() when user.roles
-            roles.push role for role in user.roles when role not in roles
-        if roles.length > 0
-            msg.reply "The following roles are available: #{roles.join(', ')}"
-        else
-            msg.reply "No roles to list."
+      roles = robot.auth.getRoles()
+      if roles.length > 0
+          msg.reply "The following roles are available: #{roles.join(', ')}"
+      else
+          msg.reply "No roles to list."
