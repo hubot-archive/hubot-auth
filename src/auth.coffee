@@ -16,7 +16,8 @@
 #   * Call the method: robot.auth.hasRole(msg.envelope.user,'<role>')
 #   * returns bool true or false
 #
-#   * the 'admin' role can only be assigned through the environment variable
+#   * the 'admin' role can only be assigned through the environment variable and
+#     it is not persisted
 #   * roles are all transformed to lower case
 #
 #   * The script assumes that user IDs will be unique on the service end as to
@@ -29,10 +30,14 @@ config =
 
 module.exports = (robot) ->
   class Auth
-    storedRoles = robot.brain.get('roles')
-    unless storedRoles
-      robot.brain.set('roles', {})
-      storedRoles = robot.brain.get('roles')
+
+    # admin role is not persistent. List of user IDs who have admin role
+    admins = []
+
+    fetchAllRoles: () ->
+      unless robot.brain.get('roles')
+        robot.brain.set('roles', {})
+      robot.brain.get('roles')
 
     isAdmin: (user) ->
       @hasRole(user, 'admin')
@@ -42,6 +47,7 @@ module.exports = (robot) ->
       if userRoles?
         roles = [roles] if typeof roles is 'string'
         for role in roles
+          return true if role == "admin" and user.id in admins
           return true if role in userRoles
       return false
 
@@ -53,19 +59,31 @@ module.exports = (robot) ->
       users
 
     userRoles: (user) ->
-      storedRoles[user.id] or= []
+      @fetchAllRoles()[user.id] or []
 
     addRole: (user, newRole) ->
+      if newRole == "admin"
+        admins.push(user.id)
+        return
       userRoles = @userRoles(user)
       userRoles.push newRole unless newRole in userRoles
+      allNewRoles = @fetchAllRoles()
+      allNewRoles[user.id] = userRoles
+      robot.brain.set('roles', allNewRoles)
 
     revokeRole: (user, newRole) ->
+      if role == "admin"
+        admins = (u for u in admins when u != user.id)
+        return
       userRoles = @userRoles(user)
       userRoles = (role for role in userRoles when role isnt newRole)
+      allNewRoles = @fetchAllRoles()
+      allNewRoles[user.id] = userRoles
+      robot.brain.set('roles', allNewRoles)
 
     getRoles: () ->
-      result = []
-      for own key, roles of storedRoles
+      result = if admins then ["admin"] else []
+      for own key,roles of @fetchAllRoles('roles')
         result.push role for role in roles unless role in result
       result
 
@@ -130,7 +148,8 @@ module.exports = (robot) ->
     if name.toLowerCase() is 'i' then name = msg.message.user.name
     user = robot.brain.userForName(name)
     return msg.reply "#{name} does not exist" unless user?
-    userRoles = robot.auth.userRoles(user)
+    userRoles = (x for x in robot.auth.userRoles(user))
+    userRoles.unshift("admin") if robot.auth.isAdmin(user)
 
     if userRoles.length == 0
       msg.reply "#{name} has no roles."
