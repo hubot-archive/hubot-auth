@@ -76,6 +76,7 @@ module.exports = (robot) ->
       users
 
     userRoles: (user) ->
+      user = robot.brain.userForId user.id
       user.roles
 
   robot.auth = new Auth
