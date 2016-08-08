@@ -6,7 +6,7 @@ expect = require("chai").expect
 describe "auth", ->
 
   beforeEach ->
-    process.env.HUBOT_AUTH_ROLES = "admin=alice"
+    process.env.HUBOT_AUTH_ADMIN = "alice"
     @room = helper.createRoom()
     @room.robot.brain.userForId "alice",
       name: "alice"
@@ -42,7 +42,7 @@ describe "auth", ->
       @room.user.say("alice", "hubot: jimmy has admin role").then =>
         expect(@room.messages).to.eql [
           ["alice", "hubot: jimmy has admin role"]
-          ["hubot", "@alice Sorry, the 'admin' role can only be defined in the HUBOT_AUTH_ROLES env variable."]
+          ["hubot", "@alice Sorry, the 'admin' role can only be defined in the HUBOT_AUTH_ADMIN env variable."]
         ]
 
     it "anon user fails to set role", ->
@@ -67,7 +67,7 @@ describe "auth", ->
       @room.user.say("alice", "hubot: jimmy doesn't have admin role").then =>
         expect(@room.messages).to.eql [
           ["alice", "hubot: jimmy doesn't have admin role"]
-          ["hubot", "@alice Sorry, the 'admin' role can only be removed from the HUBOT_AUTH_ROLES env variable."]
+          ["hubot", "@alice Sorry, the 'admin' role can only be removed from the HUBOT_AUTH_ADMIN env variable."]
         ]
 
   context "what roles does <user> have", ->
@@ -114,5 +114,5 @@ describe "auth", ->
             ["alice", "hubot: alice has test role"]
             ["hubot", "@alice OK, alice has the 'test' role."]
             ["alice", "hubot: list assigned roles"]
-            ["hubot", "@alice The following roles are available: admin, demo, test"]
+            ["hubot", "@alice The following roles are available: demo, test"]
           ]
