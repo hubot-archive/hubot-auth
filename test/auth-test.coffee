@@ -37,6 +37,13 @@ describe "auth", ->
           ["hubot", "@alice OK, alice has the 'demo' role."]
         ]
 
+    it "admin user successfully sets role for user with space in name", ->
+      @room.user.say("alice", "hubot: jimmy jones has demo role").then =>
+        expect(@room.messages).to.eql [
+          ["alice", "hubot: jimmy jones has demo role"]
+          ["hubot", "@alice OK, jimmy jones has the 'demo' role."]
+        ]
+
 
     it "fail to add admin role via command", ->
       @room.user.say("alice", "hubot: jimmy has admin role").then =>
@@ -69,6 +76,17 @@ describe "auth", ->
           ["alice", "hubot: jimmy doesn't have admin role"]
           ["hubot", "@alice Sorry, the 'admin' role can only be removed from the HUBOT_AUTH_ADMIN env variable."]
         ]
+
+
+    it "admin user successfully removes role from user with space", ->
+      @room.user.say("alice", "hubot: jimmy jones has demo role").then =>
+        @room.user.say("alice", "hubot: jimmy jones doesn't have demo role").then =>
+          expect(@room.messages).to.eql [
+            ["alice", "hubot: jimmy jones has demo role"]
+            ["hubot", "@alice OK, jimmy jones has the 'demo' role."]
+            ["alice", "hubot: jimmy jones doesn't have demo role"]
+            ["hubot", "@alice OK, jimmy jones doesn't have the 'demo' role."]
+          ]
 
   context "what roles does <user> have", ->
     beforeEach ->
@@ -116,3 +134,12 @@ describe "auth", ->
             ["alice", "hubot: list assigned roles"]
             ["hubot", "@alice The following roles are available: demo, test"]
           ]
+
+    it "successfully lists roles of user with space in name", ->
+      @room.user.say("amy", "hubot: what roles does jimmy jones have?").then =?>
+        expect(@room.messages).to.eql [
+          ["alice", "hubot: jimmy jones has demo role"]
+          ["hubot", "@alice OK, jimmy jones has the 'demo' role."]
+          ["amy", "hubot: what roles does jimmy jones have?"]
+          ["hubot", "@amy jimmy jones has the following roles: admin, demo."]
+        ]
