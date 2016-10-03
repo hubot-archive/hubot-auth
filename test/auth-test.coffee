@@ -17,6 +17,9 @@ describe "auth", ->
     @room.robot.brain.userForId "amy",
       name: "amy"
 
+    @room.robot.brain.userForId "jimmy jones",
+      name: "jimmy jones"
+
   afterEach ->
     @room.destroy()
 
