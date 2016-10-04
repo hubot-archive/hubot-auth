@@ -41,7 +41,7 @@ describe "auth", ->
         ]
 
     it "admin user successfully sets role for user with space in name", ->
-      @room.user.say("alice", "hubot: jimmy jones has demo role").then =>
+      @room.user.say("alice", "hubot: jimmy jones has demo role").then =>  
         expect(@room.messages).to.eql [
           ["alice", "hubot: jimmy jones has demo role"]
           ["hubot", "@alice OK, jimmy jones has the 'demo' role."]
@@ -139,7 +139,7 @@ describe "auth", ->
           ]
 
     it "successfully lists roles of user with space in name", ->
-      @room.user.say("amy", "hubot: what roles does jimmy jones have?").then =?>
+      @room.user.say("amy", "hubot: what roles does jimmy jones have?").then =>
         expect(@room.messages).to.eql [
           ["alice", "hubot: jimmy jones has demo role"]
           ["hubot", "@alice OK, jimmy jones has the 'demo' role."]
