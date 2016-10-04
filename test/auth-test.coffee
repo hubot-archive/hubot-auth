@@ -144,5 +144,5 @@ describe "auth", ->
           ["alice", "hubot: jimmy jones has demo role"]
           ["hubot", "@alice OK, jimmy jones has the 'demo' role."]
           ["amy", "hubot: what roles does jimmy jones have?"]
-          ["hubot", "@amy jimmy jones has the following roles: admin, demo."]
+          ["hubot", "@amy jimmy jones has the following roles: demo."]
         ]
