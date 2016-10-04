@@ -120,29 +120,28 @@ describe "auth", ->
         ]
 
   context "list assigned roles", ->
-    beforeEach ->
-        @room.user.say("alice", "hubot: alice has demo role").then =>
-          @room.user.say("alice", "hubot: amy has test role").then =>
-            @room.user.say "alice", "hubot: alice has test role"
-
     it "successfully list assigned roles", ->
-        @room.user.say("alice", "hubot: list assigned roles").then =>
-          expect(@room.messages).to.eql [
-            ["alice", "hubot: alice has demo role"]
-            ["hubot", "@alice OK, alice has the 'demo' role."]
-            ["alice", "hubot: amy has test role"]
-            ["hubot", "@alice OK, amy has the 'test' role."]
-            ["alice", "hubot: alice has test role"]
-            ["hubot", "@alice OK, alice has the 'test' role."]
-            ["alice", "hubot: list assigned roles"]
-            ["hubot", "@alice The following roles are available: demo, test"]
-          ]
+      @room.user.say("alice", "hubot: alice has demo role").then =>
+        @room.user.say("alice", "hubot: amy has test role").then =>
+          @room.user.say "alice", "hubot: alice has test role"
+            @room.user.say("alice", "hubot: list assigned roles").then =>
+              expect(@room.messages).to.eql [
+                ["alice", "hubot: alice has demo role"]
+                ["hubot", "@alice OK, alice has the 'demo' role."]
+                ["alice", "hubot: amy has test role"]
+                ["hubot", "@alice OK, amy has the 'test' role."]
+                ["alice", "hubot: alice has test role"]
+                ["hubot", "@alice OK, alice has the 'test' role."]
+                ["alice", "hubot: list assigned roles"]
+                ["hubot", "@alice The following roles are available: demo, test"]
+              ]
 
     it "successfully lists roles of user with space in name", ->
-      @room.user.say("amy", "hubot: what roles does jimmy jones have?").then =>
-        expect(@room.messages).to.eql [
-          ["alice", "hubot: jimmy jones has demo role"]
-          ["hubot", "@alice OK, jimmy jones has the 'demo' role."]
-          ["amy", "hubot: what roles does jimmy jones have?"]
-          ["hubot", "@amy jimmy jones has the following roles: demo."]
-        ]
+      @room.user.say("alice", "hubot: jimmy jones has the demo role").then =>
+        @room.user.say("amy", "hubot: what roles does jimmy jones have?").then =>
+          expect(@room.messages).to.eql [
+            ["alice", "hubot: jimmy jones has demo role"]
+            ["hubot", "@alice OK, jimmy jones has the 'demo' role."]
+            ["amy", "hubot: what roles does jimmy jones have?"]
+            ["hubot", "@amy jimmy jones has the following roles: demo."]
+          ]
