@@ -123,7 +123,7 @@ describe "auth", ->
     it "successfully list assigned roles", ->
       @room.user.say("alice", "hubot: alice has demo role").then =>
         @room.user.say("alice", "hubot: amy has test role").then =>
-          @room.user.say "alice", "hubot: alice has test role"
+          @room.user.say("alice", "hubot: alice has test role").then =>
             @room.user.say("alice", "hubot: list assigned roles").then =>
               expect(@room.messages).to.eql [
                 ["alice", "hubot: alice has demo role"]
