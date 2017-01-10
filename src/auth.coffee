@@ -144,3 +144,10 @@ module.exports = (robot) ->
             msg.reply "The following roles are available: #{roles.join(', ')}"
         else
             msg.reply "No roles to list."
+
+  robot.respond /what(?:'s|s|\s+is)\s+my\s+name\s*(?:\?|)/i, (msg) ->
+    user = robot.brain.userForId(msg.envelope.user['id'])
+    unless user and user['name']
+      msg.reply "Your user could not be found in my Brain, sorry!"
+      return
+    msg.reply "Your name is: #{user['name']}."
