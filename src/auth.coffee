@@ -151,3 +151,10 @@ module.exports = (robot) ->
       msg.reply "Your user could not be found in my Brain, sorry!"
       return
     msg.reply "Your name is: #{user['name']}."
+
+  robot.respond /what(?:'s|s|\s+is)\s+my\s+id\s*(?:\?|)/i, (msg) ->
+    user = robot.brain.userForId(msg.envelope.user['id'])
+    unless user and user['id']
+      msg.reply "Your user could not be found in my Brain, sorry!"
+      return
+    msg.reply "Your ID is: #{user['id']}."
