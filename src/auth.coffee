@@ -11,6 +11,8 @@
 #   hubot what roles do I have - Find out what roles you have
 #   hubot who has <role> role - Find out who has the given role
 #   hubot list assigned roles - List all assigned roles
+#   hubot what is my name - Tells you your name from persistent storage
+#   hubot what is my id - tells you your id from persistent storage
 #
 # Notes:
 #   * Call the method: robot.auth.hasRole(msg.envelope.user,'<role>')
