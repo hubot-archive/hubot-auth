@@ -156,7 +156,7 @@ describe "auth", ->
 
   context "what is my id", ->
     it "returns the id", ->
-      @room.user.say("alice", "hubot: what is my name?").then =>
+      @room.user.say("alice", "hubot: what is my id?").then =>
         expect(@room.messages).to.eql [
           ["alice", "hubot: what is my id?"],
           ["hubot", "@alice Your ID is: alice."]
