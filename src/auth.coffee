@@ -11,6 +11,8 @@
 #   hubot what roles do I have - Find out what roles you have
 #   hubot who has <role> role - Find out who has the given role
 #   hubot list assigned roles - List all assigned roles
+#   hubot what is my name - Tells you your name from persistent storage
+#   hubot what is my id - tells you your id from persistent storage
 #
 # Notes:
 #   * Call the method: robot.auth.hasRole(msg.envelope.user,'<role>')
@@ -144,3 +146,17 @@ module.exports = (robot) ->
             msg.reply "The following roles are available: #{roles.join(', ')}"
         else
             msg.reply "No roles to list."
+
+  robot.respond /what(?:'s|s|\s+is)\s+my\s+name\s*(?:\?|)/i, (msg) ->
+    user = robot.brain.userForId(msg.envelope.user['id'])
+    unless user and user['name']
+      msg.reply "Your user could not be found in my Brain, sorry!"
+      return
+    msg.reply "Your name is: #{user['name']}."
+
+  robot.respond /what(?:'s|s|\s+is)\s+my\s+id\s*(?:\?|)/i, (msg) ->
+    user = robot.brain.userForId(msg.envelope.user['id'])
+    unless user and user['id']
+      msg.reply "Your user could not be found in my Brain, sorry!"
+      return
+    msg.reply "Your ID is: #{user['id']}."
