@@ -151,7 +151,7 @@ describe "auth", ->
       @room.user.say("alice", "hubot: what is my name?").then =>
         expect(@room.messages).to.eql [
           ["alice", "hubot: what is my name?"],
-          ["hubot", "Your name is: alice."]
+          ["hubot", "@alice Your name is: alice."]
         ]
 
   context "what is my id", ->
@@ -159,5 +159,5 @@ describe "auth", ->
       @room.user.say("alice", "hubot: what is my name?").then =>
         expect(@room.messages).to.eql [
           ["alice", "hubot: what is my id?"],
-          ["hubot", "Your ID is: alice."]
+          ["hubot", "@alice Your ID is: alice."]
         ]
