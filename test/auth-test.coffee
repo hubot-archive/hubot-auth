@@ -145,3 +145,19 @@ describe "auth", ->
             ["amy", "hubot: what roles does jimmy jones have?"]
             ["hubot", "@amy jimmy jones has the following roles: demo."]
           ]
+
+  context "what is my name", ->
+    it "returns the name", ->
+      @room.user.say("alice", "hubot: what is my name?").then =>
+        expect(@room.messages).to.eql [
+          ["alice", "hubot: what is my name?"],
+          ["hubot", "Your name is: alice."]
+        ]
+
+  context "what is my id", ->
+    it "returns the id", ->
+      @room.user.say("alice", "hubot: what is my name?").then =>
+        expect(@room.messages).to.eql [
+          ["alice", "hubot: what is my id?"],
+          ["hubot", "Your ID is: alice."]
+        ]
