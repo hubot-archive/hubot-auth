@@ -33,7 +33,7 @@ hubot>> OK, user2 has the jester role.
 ### Restricting commands
 ```
 module.exports = (robot) ->
-  # 
+  # Command listener
   robot.respond /some command/i, (msg) ->
     role = 'some-role'
     user = robot.brain.userForName(msg.message.user.name)
@@ -46,6 +46,7 @@ module.exports = (robot) ->
     #
     msg.send 'Command done!'
 ```
+### Example Interaction
 ```
 user2>> hubot some command
 hubot>> Access Denied. You need role some-role to perform this action.
