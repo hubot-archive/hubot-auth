@@ -47,6 +47,8 @@ module.exports = (robot) ->
     msg.send 'Command done!'
 ```
 ```
+user2>> hubot some command
+hubot>> Access Denied. You need role some-role to perform this action.
 user1>> hubot user2 has some-role role
 hubot>> OK, user2 has the some-role role.
 user2>> hubot some command
