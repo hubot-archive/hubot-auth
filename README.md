@@ -28,3 +28,27 @@ Run `npm install`
 user1>> hubot user2 has jester role
 hubot>> OK, user2 has the jester role.
 ```
+
+## Sample Usage
+### Restricting commands
+```
+module.exports = (robot) ->
+  # 
+  robot.respond /some command/i, (msg) ->
+    role = 'some-role'
+    user = robot.brain.userForName(msg.message.user.name)
+    return msg.reply "#{name} does not exist" unless user?
+    unless robot.auth.hasRole(user, role)
+      msg.send "Access Denied. You need role #{role} to perform this action."
+      return
+    #
+    # Some commandy stuff
+    #
+    msg.send 'Command done!'
+```
+```
+user1>> hubot user2 has some-role role
+hubot>> OK, user2 has the some-role role.
+user2>> hubot some command
+hubot>> Command done!
+```
