@@ -31,7 +31,7 @@ hubot>> OK, user2 has the jester role.
 
 ## Sample Usage
 ### Restricting commands
-```
+```coffee
 module.exports = (robot) ->
   # Command listener
   robot.respond /some command/i, (msg) ->
@@ -39,12 +39,10 @@ module.exports = (robot) ->
     user = robot.brain.userForName(msg.message.user.name)
     return msg.reply "#{name} does not exist" unless user?
     unless robot.auth.hasRole(user, role)
-      msg.send "Access Denied. You need role #{role} to perform this action."
+      msg.reply "Access Denied. You need role #{role} to perform this action."
       return
-    #
     # Some commandy stuff
-    #
-    msg.send 'Command done!'
+    msg.reply 'Command done!'
 ```
 ### Example Interaction
 ```
