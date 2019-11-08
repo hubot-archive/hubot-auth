@@ -145,7 +145,7 @@ module.exports = (robot) ->
     unless robot.auth.isAdmin msg.message.user
         msg.reply "Sorry, only admins can run this command"
     else
-    roles = []
+        roles = []
         for i, user of robot.brain.data.users when user.roles
             roles.push role for role in user.roles when role not in roles
         if roles.length > 0
