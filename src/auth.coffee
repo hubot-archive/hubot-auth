@@ -117,33 +117,35 @@ module.exports = (robot) ->
   robot.respond /what roles? do(es)? @?(.+) have\?*$/i, (msg) ->
     unless robot.auth.isAdmin msg.message.user
         msg.reply "Sorry, only admins can run this command"
-    name = msg.match[2].trim()
-    if name.toLowerCase() is 'i' then name = msg.message.user.name
-    user = robot.brain.userForName(name)
-    return msg.reply "#{name} does not exist" unless user?
-    userRoles = robot.auth.userRoles(user)
-
-    if userRoles.length == 0
-      msg.reply "#{name} has no roles."
     else
-      msg.reply "#{name} has the following roles: #{userRoles.join(', ')}."
+        name = msg.match[2].trim()
+        if name.toLowerCase() is 'i' then name = msg.message.user.name
+        user = robot.brain.userForName(name)
+        return msg.reply "#{name} does not exist" unless user?
+        userRoles = robot.auth.userRoles(user)
+
+        if userRoles.length == 0
+          msg.reply "#{name} has no roles."
+        else
+          msg.reply "#{name} has the following roles: #{userRoles.join(', ')}."
 
   robot.respond /who has (["'\w: -_]+) role\?*$/i, (msg) ->
     unless robot.auth.isAdmin msg.message.user
         msg.reply "Sorry, only admins can run this command"
-    role = msg.match[1]
-    userNames = robot.auth.usersWithRole(role) if role?
-
-    if userNames.length > 0
-      msg.reply "The following people have the '#{role}' role: #{userNames.join(', ')}"
     else
-      msg.reply "There are no people that have the '#{role}' role."
+        role = msg.match[1]
+        userNames = robot.auth.usersWithRole(role) if role?
+
+        if userNames.length > 0
+          msg.reply "The following people have the '#{role}' role: #{userNames.join(', ')}"
+        else
+          msg.reply "There are no people that have the '#{role}' role."
 
   robot.respond /list assigned roles/i, (msg) ->
-    roles = []
     unless robot.auth.isAdmin msg.message.user
         msg.reply "Sorry, only admins can run this command"
     else
+    roles = []
         for i, user of robot.brain.data.users when user.roles
             roles.push role for role in user.roles when role not in roles
         if roles.length > 0
