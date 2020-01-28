@@ -80,11 +80,12 @@ module.exports = (robot) ->
 
         user = robot.brain.userForName(name)
         return msg.reply "#{name} does not exist" unless user?
+        robot.logger.info "The user #{name} has been assigned role #{newRole} by admin #{msg.message.user.name}"
         user.roles or= []
 
         if newRole in user.roles
           msg.reply "#{name} already has the '#{newRole}' role."
-          robot.logger.error "The user #{name} has been assigned role #{newRole} by admin #{msg.message.user.name}"
+          robot.logger.info "The user #{name} has been assigned role #{newRole} by admin #{msg.message.user.name}"
         else
           if newRole is 'admin'
             msg.reply "Sorry, the 'admin' role can only be defined in the HUBOT_AUTH_ADMIN env variable."
@@ -92,7 +93,7 @@ module.exports = (robot) ->
             myRoles = msg.message.user.roles or []
             user.roles.push(newRole)
             msg.reply "OK, #{name} has the '#{newRole}' role."
-            robot.logger.error "The user #{name} has been assigned role #{newRole} by admin #{msg.message.user.name}"
+            robot.logger.info "The user #{name} has been assigned role #{newRole} by admin #{msg.message.user.name}"
 
   robot.respond /@?(.+) (?:don['’]t|doesn['’]t|do not|does not) have (["'\w: -_]+) role/i, (msg) ->
     name = msg.match[1].trim()
