@@ -80,7 +80,6 @@ module.exports = (robot) ->
 
         user = robot.brain.userForName(name)
         return msg.reply "#{name} does not exist" unless user?
-        robot.logger.info "The user #{name} has been assigned role #{newRole} by admin #{msg.message.user.name}"
         user.roles or= []
 
         if newRole in user.roles
@@ -115,7 +114,6 @@ module.exports = (robot) ->
           myRoles = msg.message.user.roles or []
           user.roles = (role for role in user.roles when role isnt newRole)
           msg.reply "OK, #{name} doesn't have the '#{newRole}' role and is assigned by'#{}'."
-          console.log(robot.logger.info 'The user #{name} has been assigned role #{newRole} by admin #{msg.message.user.name}')
 
   robot.respond /what roles? do(es)? @?(.+) have\?*$/i, (msg) ->
     unless robot.auth.isAdmin msg.message.user
