@@ -84,6 +84,7 @@ module.exports = (robot) ->
 
         if newRole in user.roles
           msg.reply "#{name} already has the '#{newRole}' role."
+          robot.logger.info "The user #{name} has been assigned role #{newRole} by admin #{msg.message.user.name}"
         else
           if newRole is 'admin'
             msg.reply "Sorry, the 'admin' role can only be defined in the HUBOT_AUTH_ADMIN env variable."
