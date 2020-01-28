@@ -24,7 +24,6 @@
 #   * The script assumes that user IDs will be unique on the service end as to
 #     correctly identify a user. Names were insecure as a user could impersonate
 #     a user
-
 config =
   admin_list: process.env.HUBOT_AUTH_ADMIN
 
@@ -92,6 +91,7 @@ module.exports = (robot) ->
             myRoles = msg.message.user.roles or []
             user.roles.push(newRole)
             msg.reply "OK, #{name} has the '#{newRole}' role."
+            robot.logger.info "The user #{name} has been assigned role #{newRole} by admin #{user}"
 
   robot.respond /@?(.+) (?:don['’]t|doesn['’]t|do not|does not) have (["'\w: -_]+) role/i, (msg) ->
     name = msg.match[1].trim()
@@ -112,7 +112,7 @@ module.exports = (robot) ->
         else
           myRoles = msg.message.user.roles or []
           user.roles = (role for role in user.roles when role isnt newRole)
-          msg.reply "OK, #{name} doesn't have the '#{newRole}' role."
+          msg.reply "OK, #{name} doesn't have the '#{newRole}' role and is assigned by'#{msg.message.user.name}'."
 
   robot.respond /what roles? do(es)? @?(.+) have\?*$/i, (msg) ->
     unless robot.auth.isAdmin msg.message.user
