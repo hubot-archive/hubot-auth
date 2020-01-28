@@ -112,7 +112,9 @@ module.exports = (robot) ->
         else
           myRoles = msg.message.user.roles or []
           user.roles = (role for role in user.roles when role isnt newRole)
-          msg.reply "OK, #{name} doesn't have the '#{newRole}' role and is assigned by'#{}'."
+          msg.reply "OK, #{name} doesn't have the '#{newRole}' role."
+          robot.logger.info "The user #{name} has been removed role #{newRole} by admin #{msg.message.user.name}"
+
 
   robot.respond /what roles? do(es)? @?(.+) have\?*$/i, (msg) ->
     unless robot.auth.isAdmin msg.message.user
