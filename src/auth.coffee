@@ -91,7 +91,7 @@ module.exports = (robot) ->
             myRoles = msg.message.user.roles or []
             user.roles.push(newRole)
             msg.reply "OK, #{name} has the '#{newRole}' role."
-            robot.logger.info "The user #{name} has been assigned role #{newRole} by admin #{msg.message.user.name}"
+            robot.logger.info "The user #{name} has been assigned role #{newRole} by admin #{msg.message.user.name} having Id #{msg.message.user.name}"
 
   robot.respond /@?(.+) (?:don['’]t|doesn['’]t|do not|does not) have (["'\w: -_]+) role/i, (msg) ->
     name = msg.match[1].trim()
@@ -113,7 +113,7 @@ module.exports = (robot) ->
           myRoles = msg.message.user.roles or []
           user.roles = (role for role in user.roles when role isnt newRole)
           msg.reply "OK, #{name} doesn't have the '#{newRole}' role."
-          robot.logger.info "The user #{name} has been removed role #{newRole} by admin #{msg.message.user.name}"
+          robot.logger.info "The user #{name} has been removed role #{newRole} by admin #{msg.message.user.name} having Id #{msg.message.user.name}"
 
 
   robot.respond /what roles? do(es)? @?(.+) have\?*$/i, (msg) ->
